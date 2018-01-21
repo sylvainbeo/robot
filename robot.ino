@@ -76,19 +76,19 @@ class Flasher
     public:
     Flasher(int pin, long on, long off)
     {
-        _ledPin = pin;
-        pinMode(_ledPin, OUTPUT);
+        this->_ledPin = pin;
+        pinMode(this->_ledPin, OUTPUT);
 
-        _OnTime = on;
-        _OffTime = off;
+        this->_OnTime = on;
+        this->_OffTime = off;
 
-        _ledState = LOW;
-        _previousMillis = 0;
+        this->_ledState = LOW;
+        this->_previousMillis = 0;
     }
 
     void changeDelays(long on, long off) {
-        _OnTime = on;
-        _OffTime = off;
+        this->_OnTime = on;
+        this->_OffTime = off;
     }
 
     void update(float distance)
@@ -104,17 +104,17 @@ class Flasher
         // check to see if it's time to change the state of the LED
         unsigned long currentMillis = millis();
 
-        if ((_ledState == HIGH) && (currentMillis - _previousMillis >= _OnTime))
+        if ((this->_ledState == HIGH) && (currentMillis - this->_previousMillis >= this->_OnTime))
         {
-            _ledState = LOW;  // Turn it off
-            _previousMillis = currentMillis;  // Remember the time
-            digitalWrite(_ledPin, _ledState);  // update the actual LED
+            this->_ledState = LOW;  // Turn it off
+            this->_previousMillis = currentMillis;  // Remember the time
+            digitalWrite(this->_ledPin, this->_ledState);  // update the actual LED
         }
-        else if ((_ledState == LOW) && (currentMillis - _previousMillis >= _OffTime))
+        else if ((this->_ledState == LOW) && (currentMillis - this->_previousMillis >= this->_OffTime))
         {
-            _ledState = HIGH;  // turn it on
-            _previousMillis = currentMillis;   // Remember the time
-            digitalWrite(_ledPin, _ledState);   // update the actual LED
+            this->_ledState = HIGH;  // turn it on
+            this->_previousMillis = currentMillis;   // Remember the time
+            digitalWrite(this->_ledPin, this->_ledState);   // update the actual LED
         }
     }
 };
@@ -127,41 +127,36 @@ class UltraSound
     int _triggerPin;
     int _echoPin;
 
-    // These maintain the current state
-    unsigned long _previousMicros;   // will store last time LED was updated
-
     // Constructor - creates a Sound
     // and initializes the member variables and state
     public:
     UltraSound(int triggerPin, int echoPin)
     {
-        _triggerPin = triggerPin;
-        _echoPin = echoPin;
+        this->_triggerPin = triggerPin;
+        this->_echoPin = echoPin;
 
-        pinMode(_triggerPin, OUTPUT);
-        digitalWrite(_triggerPin, LOW); // La broche TRIGGER doit être à LOW au repos
-        pinMode(_echoPin, INPUT);
-
-        _previousMicros = 0;
+        pinMode(this->_triggerPin, OUTPUT);
+        digitalWrite(this->_triggerPin, LOW); // La broche TRIGGER doit être à LOW au repos
+        pinMode(this->_echoPin, INPUT);
     }
 
     float getDistance() // returns the distance (cm)
     {
         long duration, distance;
 
-        digitalWrite(_triggerPin, HIGH); // We send a 10us pulse
+        digitalWrite(this->_triggerPin, HIGH); // We send a 10us pulse
         delayMicroseconds(10);
-        digitalWrite(_triggerPin, LOW);
+        digitalWrite(this->_triggerPin, LOW);
 
-        duration = pulseIn(_echoPin, HIGH, 20000); // We wait for the echo to come back, with a timeout of 20ms, which corresponds approximately to 3m
+        duration = pulseIn(this->_echoPin, HIGH, 20000); // We wait for the echo to come back, with a timeout of 20ms, which corresponds approximately to 3m
 
         // pulseIn will only return 0 if it timed out. (or if echoPin was already to 1, but it should not happen)
         if (duration == 0) // If we timed out
         {
-            pinMode(_echoPin, OUTPUT); // Then we set echo pin to output mode
-            digitalWrite(_echoPin, LOW); // We send a LOW pulse to the echo pin
+            pinMode(this->_echoPin, OUTPUT); // Then we set echo pin to output mode
+            digitalWrite(this->_echoPin, LOW); // We send a LOW pulse to the echo pin
             delayMicroseconds(200);
-            pinMode(_echoPin, INPUT); // And finaly we come back to input mode
+            pinMode(this->_echoPin, INPUT); // And finaly we come back to input mode
         }
 
         distance = (duration / 2) / 29.1; // We calculate the distance (sound speed in air is aprox. 291m/s), /2 because of the pulse going and coming
@@ -183,7 +178,7 @@ class GestureSensor
     }
 
     init() {
-        if (!apds.begin()) {
+        if (!this->apds.begin()) {
             if (DEBUG)
             Serial.println("failed to initialize device! Please check your wiring.");
         }
@@ -193,13 +188,13 @@ class GestureSensor
         }
 
       //gesture mode will be entered once proximity mode senses something close
-      apds.enableProximity(true);
-      apds.enableGesture(true);
+      this->apds.enableProximity(true);
+      this->apds.enableGesture(true);
     }
 
     uint8_t getOrder() {
         //read a gesture from the device
-        uint8_t gesture = apds.readGesture();
+        uint8_t gesture = this->apds.readGesture();
         if (gesture == APDS9960_DOWN) {
             if (DEBUG)
                 Serial.println("v");
@@ -233,7 +228,7 @@ class ColorSensor
     }
 
     init() {
-        if (!apds.begin()) {
+        if (!this->apds.begin()) {
             if (DEBUG)
             Serial.println("failed to initialize device! Please check your wiring.");
         }
@@ -242,19 +237,19 @@ class ColorSensor
                 Serial.println("Device initialized!");
         }
 
-      apds.enableColor(true);
+      this->apds.enableColor(true);
     }
 
     uint8_t getColor() {
         uint16_t r, g, b, c;
 
         //wait for color data to be ready
-        while(!apds.colorDataReady()){
+        while(!this->apds.colorDataReady()){
             delay(5);
         }
 
         //get the data and print the different channels
-        apds.getColorData(&r, &g, &b, &c);
+        this->apds.getColorData(&r, &g, &b, &c);
         /*
         Serial.print("red: ");
         Serial.print(r);
@@ -293,7 +288,7 @@ class ReflectanceSensor
     }
 
     uint8_t getReflectance() {
-        int val = analogRead(_analogPin);
+        int val = analogRead(this->_analogPin);
         float voltage = (val/1024.0)*5.0;
         if (DEBUG)
             Serial.println(voltage);
@@ -314,23 +309,23 @@ class Motor
     public:
     Motor(int motorPin)
     {
-        _motorPin = motorPin;
-        pinMode(_motorPin, OUTPUT);
-        _motor = motorShield.getMotor(_motorPin);
+        this->_motorPin = motorPin;
+        pinMode(this->_motorPin, OUTPUT);
+        this->_motor = motorShield.getMotor(this->_motorPin);
     }
 
     void forward(int speed=MAX_SPEED) {
-        _motor->setSpeed(speed);
-        _motor->run(FORWARD);
+        this->_motor->setSpeed(speed);
+        this->_motor->run(FORWARD);
     }
 
     void backward(int speed=MAX_SPEED) {
-        _motor->setSpeed(speed);
-        _motor->run(BACKWARD);
+        this->_motor->setSpeed(speed);
+        this->_motor->run(BACKWARD);
     }
 
     void stop() {
-        _motor->run(RELEASE);
+        this->_motor->run(RELEASE);
     }
 };
 
@@ -358,16 +353,16 @@ class Movement
     public:
     Movement(Motor *mFrontLeft, Motor *mBackLeft, Motor *mFrontRight, Motor *mBackRight)
     {
-        _motorFrontLeft = mFrontLeft;
-        _motorBackLeft = mBackLeft;
-        _motorFrontRight = mFrontRight;
-        _motorBackRight = mBackRight;
+        this->_motorFrontLeft = mFrontLeft;
+        this->_motorBackLeft = mBackLeft;
+        this->_motorFrontRight = mFrontRight;
+        this->_motorBackRight = mBackRight;
 
-        _maxSpeed = MAX_SPEED;
-        _lowSpeed = LOW_SPEED;
-        _turnSpeed = TURN_SPEED;
-        _turn180Time = TIME_TURN_180;
-        _turn90Time = TIME_TURN_90;
+        this->_maxSpeed = MAX_SPEED;
+        this->_lowSpeed = LOW_SPEED;
+        this->_turnSpeed = TURN_SPEED;
+        this->_turn180Time = TIME_TURN_180;
+        this->_turn90Time = TIME_TURN_90;
     }
 
     void setSpeed(int speed)
@@ -377,207 +372,207 @@ class Movement
 
     void setMaxSpeed(int speed)
     {
-        _maxSpeed = speed;
+        this->_maxSpeed = speed;
     }
 
     void setTurnSpeed(int speed)
     {
-        _turnSpeed = speed;
-        setTurnTime(speed);
+        this->_turnSpeed = speed;
+        this->setTurnTime(speed);
     }
 
     void setDistanceFront(float distance) {
-        _distanceFront = distance;
+        this->_distanceFront = distance;
     }
 
     void setDistanceLeft(float distance) {
-        _distanceLeft = distance;
+        this->_distanceLeft = distance;
     }
 
     void setDistanceRight(float distance) {
-        _distanceRight = distance;
+        this->_distanceRight = distance;
     }
 
     void setTurnMode(int turnMode) {
-        _turnMode = turnMode;
+        this->_turnMode = turnMode;
     }
 
     void setTurnTime(int speed) {
-        _turn180Time = map(speed, 0, 255, 500, 1000);
-        _turn90Time = map(speed, 0, 255, 200, 500);
+        this->_turn180Time = map(speed, 0, 255, 500, 1000);
+        this->_turn90Time = map(speed, 0, 255, 200, 500);
     }
 
     int update() {
         // According to the distanceFront, slow down, and turn (if distanceLeft and distanceRight are OK)
-        if (_distanceFront > OBSTACLE_DISTANCE_STOP) {
-            _direction = 90;
-            if (_distanceFront > OBSTACLE_DISTANCE_SLOWDOWN) {
-                setSpeed(_maxSpeed);
-                forward();
-                _direction = 90;
+        if (this->_distanceFront > OBSTACLE_DISTANCE_STOP) {
+            this->_direction = 90;
+            if (this->_distanceFront > OBSTACLE_DISTANCE_SLOWDOWN) {
+                this->setSpeed(this->_maxSpeed);
+                this->forward();
+                this->_direction = 90;
                 if (DEBUG) {
                     Serial.println("FORWARD FULL SPEED");
                 }
-            } else if (_distanceFront > OBSTACLE_DISTANCE_STOP) {
-                int valeur = map(_distanceFront, 10, 100, _lowSpeed, _maxSpeed); // Conversion en valeur
-                setSpeed(valeur); // On définit la vitesse de rotation
-                forward();
+            } else if (this->_distanceFront > OBSTACLE_DISTANCE_STOP) {
+                int valeur = map(this->_distanceFront, 10, 100, this->_lowSpeed, this->_maxSpeed); // Conversion en valeur
+                this->setSpeed(valeur); // On définit la vitesse de rotation
+                this->forward();
                 if (DEBUG) {
                     Serial.println("FORWARD ");
                     Serial.println(valeur);
                 }
             }
             // Direction adjustments
-            correctLeft();
-            correctRight();
+            this->correctLeft();
+            this->correctRight();
         } else {
             // TURN mode
             // Check sensor on the left and right, and turn accordingly
             // there might be a bug there. Because if there are 2 obstacles on left and right, the robot will turn on  the side where the obstacle is the farest.... but while turning, the obstacle may become closer, and then the robot try to turn the other way....stuck !
             // SOLUTION => detect that case (if there are too many left turn / right turn / left turn / right turn...then force a local loop to procede a 180 degree (according to the current speed, make some tests to determine the necessary time to do that)
-            if((_distanceLeft < _distanceRight) && (_distanceRight > OBSTACLE_DISTANCE_TURN)) {
+            if((this->_distanceLeft < this->_distanceRight) && (this->_distanceRight > OBSTACLE_DISTANCE_TURN)) {
                 // we have to turn right until the FRONT is clear (_distanceFront > OBSTACLE_DISTANCE_TURN), and the LEFT is away suffisant from the right obstacle (_distanceLeft >    OBSTACLE_DISTANCE_TURN)
                 // But i think it will be done by the correct function
                 if (DEBUG) {
                     Serial.println("TURN RIGHT");
                 }
-                turnRight();
-                _direction = 180;
+                this->turnRight();
+                this->_direction = 180;
             }
-            else if((_distanceLeft > _distanceRight) && (_distanceLeft > OBSTACLE_DISTANCE_TURN)) {
+            else if((this->_distanceLeft > this->_distanceRight) && (this->_distanceLeft > OBSTACLE_DISTANCE_TURN)) {
                 // we have to turn left until the FRONT is clear (_distanceFront > OBSTACLE_DISTANCE_TURN), and the RIGHT is away suffisant from the left obstacle (_distanceRight > OBSTACLE_DISTANCE_TURN)
                 // But i think it will be done by the correct function
                 if (DEBUG) {
                     Serial.println("TURN LEFT");
                 }
-                turnLeft();
-                _direction = 0;
+                this->turnLeft();
+                this->_direction = 0;
             } else {
                 // Do 180 turn
-                turn180();
-                _direction = 90;
+                this->turn180();
+                this->_direction = 90;
             }
         }
 
-        return _direction;
+        return this->_direction;
     }
 
     void forward() {
-        _motorFrontLeft->forward(_speed);
-        _motorBackLeft->forward(_speed);
-        _motorFrontRight->forward(_speed);
-        _motorBackRight->forward(_speed);
+        this->_motorFrontLeft->forward(this->_speed);
+        this->_motorBackLeft->forward(this->_speed);
+        this->_motorFrontRight->forward(this->_speed);
+        this->_motorBackRight->forward(this->_speed);
     }
 
     void backward() {
-        _motorFrontLeft->backward(_speed);
-        _motorBackLeft->backward(_speed);
-        _motorFrontRight->backward(_speed);
-        _motorBackRight->backward(_speed);
+        this->_motorFrontLeft->backward(this->_speed);
+        this->_motorBackLeft->backward(this->_speed);
+        this->_motorFrontRight->backward(this->_speed);
+        this->_motorBackRight->backward(this->_speed);
     }
 
     void turnLeft() {
         // if _turnMode == 0 , in place, else smooth
-        if(_turnMode == 0) {
-             _motorFrontLeft->backward(_turnSpeed);
-             _motorBackLeft->backward(_turnSpeed);
-            _motorFrontRight->forward(_turnSpeed);
-            _motorBackRight->forward(_turnSpeed);
-        } else if(_turnMode == 1) {
-            _motorFrontLeft->forward(_turnSpeed / 2);
-            _motorBackLeft->forward(_turnSpeed / 2);
-            _motorFrontRight->forward(_turnSpeed);
-            _motorBackRight->forward(_turnSpeed);
+        if(this->_turnMode == 0) {
+            this->_motorFrontLeft->backward(this->_turnSpeed);
+            this->_motorBackLeft->backward(this->_turnSpeed);
+            this->_motorFrontRight->forward(this->_turnSpeed);
+            this->_motorBackRight->forward(this->_turnSpeed);
+        } else if(this->_turnMode == 1) {
+            this->_motorFrontLeft->forward(this->_turnSpeed / 2);
+            this->_motorBackLeft->forward(this->_turnSpeed / 2);
+            this->_motorFrontRight->forward(this->_turnSpeed);
+            this->_motorBackRight->forward(this->_turnSpeed);
         } else {
-            turn90(0);
+            this->turn90(0);
         }
     }
 
     void turnRight() {
         // if _turnMode == 0 , in place, else smooth
-        if(_turnMode == 0) {
-            _motorFrontLeft->forward(_turnSpeed);
-            _motorBackLeft->forward(_turnSpeed);
-            _motorFrontRight->backward(_turnSpeed);
-            _motorBackRight->backward(_turnSpeed);
+        if(this->_turnMode == 0) {
+            this->_motorFrontLeft->forward(this->_turnSpeed);
+            this->_motorBackLeft->forward(this->_turnSpeed);
+            this->_motorFrontRight->backward(this->_turnSpeed);
+            this->_motorBackRight->backward(this->_turnSpeed);
         } else if(_turnMode == 1) {
-            _motorFrontLeft->forward(_turnSpeed);
-            _motorBackLeft->forward(_turnSpeed);
-            _motorFrontRight->forward(_turnSpeed / 2);
-            _motorBackRight->forward(_turnSpeed / 2);
+            this->_motorFrontLeft->forward(this->_turnSpeed);
+            this->_motorBackLeft->forward(this->_turnSpeed);
+            this->_motorFrontRight->forward(this->_turnSpeed / 2);
+            this->_motorBackRight->forward(this->_turnSpeed / 2);
         } else {
-            turn90(1);
+            this->turn90(1);
         }
     }
 
     void turn90(int way) { // way = 0: left, 1: right
-        unsigned long _previousMillis;
+        unsigned long previousMillis;
         unsigned long currentMillis = millis();
-        _previousMillis = currentMillis;
+        previousMillis = currentMillis;
 
-        while((currentMillis - _previousMillis) <= _turn90Time)
+        while((currentMillis - previousMillis) <= this->_turn90Time)
         {
             if (DEBUG) {
                 Serial.println("TURNING 90");
             }
             currentMillis = millis();
             if(way) {
-                _motorFrontLeft->forward(_turnSpeed);
-                _motorBackLeft->forward(_turnSpeed);
-                _motorFrontRight->backward(_turnSpeed);
-                _motorBackRight->backward(_turnSpeed);
+                this->_motorFrontLeft->forward(this->_turnSpeed);
+                this->_motorBackLeft->forward(this->_turnSpeed);
+                this->_motorFrontRight->backward(this->_turnSpeed);
+                this->_motorBackRight->backward(this->_turnSpeed);
             }
             else {
-                _motorFrontLeft->backward(_turnSpeed);
-                _motorBackLeft->backward(_turnSpeed);
-                _motorFrontRight->forward(_turnSpeed);
-                _motorBackRight->forward(_turnSpeed);
+                this->_motorFrontLeft->backward(this->_turnSpeed);
+                this->_motorBackLeft->backward(this->_turnSpeed);
+                this->_motorFrontRight->forward(this->_turnSpeed);
+                this->_motorBackRight->forward(this->_turnSpeed);
             }
         }
     }
 
     void turn180() {
-        unsigned long _previousMillis;
+        unsigned long previousMillis;
         unsigned long currentMillis = millis();
-        _previousMillis = currentMillis;
+        previousMillis = currentMillis;
 
-        while((currentMillis - _previousMillis) <= _turn180Time)
+        while((currentMillis - previousMillis) <= this->_turn180Time)
         {
             if (DEBUG) {
                 Serial.println("TURNING 180");
             }
             currentMillis = millis();
-            turnLeft();
+            this->turnLeft();
         }
     }
 
     void correctLeft() {
         // If an obstacle get closer on the LEFT, then slow down the RIGHT motors to correct the direction
-        if (_distanceLeft < OBSTACLE_DISTANCE_SIDE_CORRECT) {
-             if (DEBUG) {
-                 Serial.println("FORWARD: correcting LEFT");
-             }
-            _motorFrontRight->backward(CORRECT_SPEED);
-            _motorBackRight->backward(CORRECT_SPEED);
+        if (this->_distanceLeft < OBSTACLE_DISTANCE_SIDE_CORRECT) {
+            if (DEBUG) {
+                Serial.println("FORWARD: correcting LEFT");
+            }
+            this->_motorFrontRight->backward(CORRECT_SPEED);
+            this->_motorBackRight->backward(CORRECT_SPEED);
         }
     }
 
     void correctRight() {
         // If an obstacle get closer on the RIGHT, then slow down the LEFT motors to corect the direction
-        if (_distanceRight < OBSTACLE_DISTANCE_SIDE_CORRECT) {
+        if (this->_distanceRight < OBSTACLE_DISTANCE_SIDE_CORRECT) {
              if (DEBUG) {
                  Serial.println("FORWARD: correcting RIGHT");
              }
-            _motorFrontLeft->backward(CORRECT_SPEED);
-            _motorBackLeft->backward(CORRECT_SPEED);
+            this->_motorFrontLeft->backward(CORRECT_SPEED);
+            this->_motorBackLeft->backward(CORRECT_SPEED);
         }
     }
 
     void stop() {
-        _motorFrontLeft->stop();
-        _motorBackLeft->stop();
-        _motorFrontRight->stop();
-        _motorBackRight->stop();
+        this->_motorFrontLeft->stop();
+        this->_motorBackLeft->stop();
+        this->_motorFrontRight->stop();
+        this->_motorBackRight->stop();
     }
 };
 
