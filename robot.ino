@@ -355,8 +355,8 @@ class Movement
     }
 
     void setTurnTime(int speed) {
-        this->_turn180Time = map(speed, 0, 255, 500, 1000);
-        this->_turn90Time = map(speed, 0, 255, 200, 500);
+        this->_turn180Time = map(speed, 0, 255, 500, TIME_TURN_180);
+        this->_turn90Time = map(speed, 0, 255, 200, TIME_TURN_90);
     }
 
     int update() {

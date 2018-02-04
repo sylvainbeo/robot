@@ -3,14 +3,14 @@ const bool DEBUG_SENSOR = false;
 
 const int TIME_OUT = 50000;
 
-const byte FRONT_TRIGGER_PIN = 3; // Broche TRIGGER
-const byte FRONT_ECHO_PIN = 2;    // Broche ECHO
+const byte RIGHT_TRIGGER_PIN = 2; // Broche TRIGGER
+const byte RIGHT_ECHO_PIN = 3;    // Broche ECHO
 
-const byte LEFT_TRIGGER_PIN = 5; // Broche TRIGGER
-const byte LEFT_ECHO_PIN = 4;    // Broche ECHO
+const byte FRONT_TRIGGER_PIN = 4; // Broche TRIGGER
+const byte FRONT_ECHO_PIN = 5;    // Broche ECHO
 
-const byte RIGHT_TRIGGER_PIN = 7; // Broche TRIGGER
-const byte RIGHT_ECHO_PIN = 6;    // Broche ECHO
+const byte LEFT_TRIGGER_PIN = 6; // Broche TRIGGER
+const byte LEFT_ECHO_PIN = 7;    // Broche ECHO
 
 const int LED_PIN = 8;
 const int REFLECTANCE_PIN = A0;
@@ -30,7 +30,6 @@ const int OBSTACLE_DISTANCE_SIDE_CORRECT = 20;
 const int TIME_TURN_180 = 1000;
 const int TIME_TURN_90 = 500;
 const int TIME_TURN_10 = 100;
-
 
 const int TURN_MODE = 2; // 0: in place, 1 smooth, 2: constant (turn approx. 90 degrees each time)
 /*
