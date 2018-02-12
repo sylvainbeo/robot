@@ -11,6 +11,7 @@
 Adafruit_MotorShield motorShield = Adafruit_MotorShield();
 /* Assign a unique ID to this sensor at the same time */
 Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(12345);
+Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(54321);
 
 
 // TODO
@@ -19,66 +20,7 @@ Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(12345);
  * 
  */
 
-////////////////////////////////////////////////////////////////////////
-class Flasher
-{
-    // Class Member Variables
-    // These are initialized at startup
-    int _ledPin;      // the number of the LED pin
-    long _OnTime;     // milliseconds of on-time
-    long _OffTime;    // milliseconds of off-time
 
-    // These maintain the current state
-    int _ledState;                 // ledState used to set the LED
-    unsigned long _previousMillis;   // will store last time LED was updated
-
-    // Constructor - creates a Flasher
-    // and initializes the member variables and state
-    public:
-    Flasher(int pin, long on, long off)
-    {
-        this->_ledPin = pin;
-        pinMode(this->_ledPin, OUTPUT);
-
-        this->_OnTime = on;
-        this->_OffTime = off;
-
-        this->_ledState = LOW;
-        this->_previousMillis = 0;
-    }
-
-    void changeDelays(long on, long off) {
-        this->_OnTime = on;
-        this->_OffTime = off;
-    }
-
-    void update(float distance)
-    {
-        if (distance > 100) {
-            changeDelays(100, 400);
-        } else if (distance > OBSTACLE_DISTANCE_STOP) {
-            changeDelays(50, 200);
-        } else {
-            changeDelays(10, 50);
-        }
-
-        // check to see if it's time to change the state of the LED
-        unsigned long currentMillis = millis();
-
-        if ((this->_ledState == HIGH) && (currentMillis - this->_previousMillis >= this->_OnTime))
-        {
-            this->_ledState = LOW;  // Turn it off
-            this->_previousMillis = currentMillis;  // Remember the time
-            digitalWrite(this->_ledPin, this->_ledState);  // update the actual LED
-        }
-        else if ((this->_ledState == LOW) && (currentMillis - this->_previousMillis >= this->_OffTime))
-        {
-            this->_ledState = HIGH;  // turn it on
-            this->_previousMillis = currentMillis;   // Remember the time
-            digitalWrite(this->_ledPin, this->_ledState);   // update the actual LED
-        }
-    }
-};
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -86,7 +28,7 @@ class Color
 {
     //int _ledState;                 // ledState used to set the LED
 
-    // Constructor - creates a Flasher
+    // Constructor - creates a colored led
     // and initializes the member variables and state
     public:
     Color()
@@ -338,10 +280,7 @@ class Motor
 ////////////////////////////////////////////////////////////////////////
 class Compass
 {
-    int _motorPin;
-    Adafruit_DCMotor *_motor;
-
-    // Constructor - creates a Sound
+    // Constructor
     // and initializes the member variables and state
     public:
     Compass()
@@ -374,10 +313,10 @@ class Compass
             //  Mag Maximums: 58.27  36.36  44.18      
             float avgX = (-47.82 + 58.27) / 2;
             float avgY = (-70.64 + 36.36) / 2;
-            
+
             float deltaX = event.magnetic.x - avgX;
             float deltaY = event.magnetic.y - avgY;
-            
+
             //float heading = (atan2(event.magnetic.y,event.magnetic.x) * 180) / Pi;
             float heading = (atan2(deltaY ,deltaX) * 180) / Pi;
 
@@ -389,20 +328,93 @@ class Compass
 
             //tabHeadings[i] = heading;
 
-            if(DEBUG_COMPASS) {
-//                 Serial.print("  Heading: ");
-//                 Serial.println(heading);
-            }
-
             // TODO 
             // Il y a des fois des valeurs absurdes
             // Il faut donc prendre 5 mesures et prendre  celle qui est la plus différentes des autres ,et renvoyer une moyenne
             // ex:  5 6 5 300 5 => on enelève le 300
 //         }
-        
         // TODO avg tabHeadings
-        
         return heading;
+    }
+
+};
+
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+class Accelerometer
+{
+
+    // Constructor
+    // and initializes the member variables and state
+    public:
+    Accelerometer()
+    {
+    }
+
+    void init() {
+        if(!accel.begin())
+        {
+            if(DEBUG_COMPASS)
+                Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
+            while(1);
+        }
+
+        // Display some basic information on this sensor
+        this->displaySensorDetails();
+    }
+
+    void displaySensorDetails(void)
+    {
+        sensor_t sensor;
+        accel.getSensor(&sensor);
+        Serial.println("------------------------------------");
+        Serial.print  ("Sensor:       "); Serial.println(sensor.name);
+        Serial.print  ("Driver Ver:   "); Serial.println(sensor.version);
+        Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
+        Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" m/s^2");
+        Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" m/s^2");
+        Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" m/s^2");
+        Serial.println("------------------------------------");
+        Serial.println("");
+        //delay(500);
+    }
+
+    float getAcceleration() {
+        sensors_event_t event;
+        accel.getEvent(&event);
+        Serial.print("X: "); Serial.print(event.acceleration.x); Serial.print("  ");
+        Serial.print("Y: "); Serial.print(event.acceleration.y); Serial.print("  ");
+        Serial.print("Z: "); Serial.print(event.acceleration.z); Serial.print("  ");Serial.print ("m/s^2            ");
+        return 0.0;
+    }
+
+    bool isStuck() {
+        return false; // TODO 
+        
+        // TODO
+        sensors_event_t event;
+        accel.getEvent(&event);
+
+//         Serial.print("X: "); Serial.print(event.acceleration.x); Serial.print("  ");
+//         Serial.print("Y: "); Serial.print(event.acceleration.y); Serial.print("  ");
+//         Serial.print("Z: "); Serial.print(event.acceleration.z); Serial.print("  ");
+        //if(abs(event.acceleration.x) < 0.8 && abs(event.acceleration.y) < 0.4)  { // TODO settings
+        /*
+        if(abs(event.acceleration.x) < 0.8 && abs(event.acceleration.y) < 0.4)  { // TODO settings
+            //return true;
+        }
+        return false;
+        */
+        if(abs(event.acceleration.x) > 0.75 || abs(event.acceleration.y) > 0.4)  { // TODO settings
+            Serial.print("X: "); Serial.print(event.acceleration.x); Serial.print("  ");
+            Serial.print("Y: "); Serial.print(event.acceleration.y); Serial.print("  ");
+            Serial.print("   NOT STUCK    ");
+            return false;
+        }
+        Serial.print("   SSSSSSTUCK    ");
+        return true;
+
     }
 
 };
@@ -419,7 +431,6 @@ class Movement
     int _turn180Time;
     int _turn90Time;
     int _turnDegTime;
-    int _direction;
     float _distanceFront;
     float _distanceLeft;
     float _distanceRight;
@@ -430,11 +441,13 @@ class Movement
     UltraSound *_sensorFront;
     Color *_color;
     Compass *_compass;
+    Accelerometer *_accelerometer;
 
     public:
-    Movement(Compass *mCompass, Motor *mFrontLeft, Motor *mBackLeft, Motor *mFrontRight, Motor *mBackRight, UltraSound *mSensorFront, Color *mColor)
+    Movement(Compass *mCompass, Accelerometer *mAccelerometer, Motor *mFrontLeft, Motor *mBackLeft, Motor *mFrontRight, Motor *mBackRight, UltraSound *mSensorFront, Color *mColor)
     {
         this->_compass = mCompass;
+        this->_accelerometer = mAccelerometer;
 
         this->_motorFrontLeft = mFrontLeft;
         this->_motorBackLeft = mBackLeft;
@@ -493,14 +506,16 @@ class Movement
     }
 
     int update() {
+        //float acceleration = _accelerometer->getAcceleration();
+        if(_accelerometer->isStuck())
+            this->moveBackAndTurn();
+
         // According to the distanceFront, slow down, and turn (if distanceLeft and distanceRight are OK)
         if (this->_distanceFront > OBSTACLE_DISTANCE_STOP) {
             _color->displayColor(COLOR_GREEN);
-            this->_direction = 90;
             if (this->_distanceFront > OBSTACLE_DISTANCE_SLOWDOWN) {
                 this->setSpeed(this->_maxSpeed);
                 this->forward();
-                this->_direction = 90;
                 if (DEBUG) {
                     //Serial.println("FORWARD FULL SPEED");
                     Serial.print("FORWARD FULL SPEED     ");
@@ -531,7 +546,6 @@ class Movement
                     Serial.println("TURN RIGHT");
                 }
                 this->turnRight();
-                this->_direction = 180;
             }
             else if((this->_distanceLeft > this->_distanceRight) && (this->_distanceLeft > OBSTACLE_DISTANCE_TURN)) {
                 // we have to turn left until the FRONT is clear (_distanceFront > OBSTACLE_DISTANCE_TURN), and the RIGHT is away suffisant from the left obstacle (_distanceRight > OBSTACLE_DISTANCE_TURN)
@@ -541,16 +555,20 @@ class Movement
                     Serial.println("TURN LEFT");
                 }
                 this->turnLeft();
-                this->_direction = 0;
             } else {
                 // Do 180 turn
                 _color->displayColor(COLOR_RED);
                 this->turnDeg(0, 180); // TODO variable for this value
-                this->_direction = 90;
             }
         }
+        //return this->_direction;
+    }
 
-        return this->_direction;
+    void moveBackAndTurn() {
+        _color->displayColor(COLOR_WHITE);
+        backward();
+        delay(500);
+        this->turnDeg(0, 180); // TODO variable for this value
     }
 
     void forward() {
@@ -677,30 +695,6 @@ class Movement
             }*/
         }
     }
-    /*
-    void turn180() {
-
-        float startHeading = _compass->getHeading();
-        float currentHeading = startHeading;
-        float deltaDeg = abs(currentHeading - startHeading);
-
-        while(deltaDeg <= 180)
-        {
-            if (DEBUG) {
-                Serial.println("TURNING 180");
-            }
-            currentHeading = _compass->getHeading();
-
-            currentHeading = _compass->getHeading();
-            deltaDeg = abs(currentHeading - startHeading);
-
-            this->_motorFrontLeft->backward(this->_turnSpeed);
-            this->_motorBackLeft->backward(this->_turnSpeed);
-            this->_motorFrontRight->forward(this->_turnSpeed);
-            this->_motorBackRight->forward(this->_turnSpeed);
-        }
-    }
-    */
 
     void correctLeft() {
         // If an obstacle get closer on the LEFT, then slow down the RIGHT motors to correct the direction
@@ -740,7 +734,7 @@ class Movement
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-//Flasher led1(LED_PIN, 100, 400);
+
 UltraSound sensorFront(FRONT_TRIGGER_PIN, FRONT_ECHO_PIN);
 UltraSound sensorLeft(LEFT_TRIGGER_PIN, LEFT_ECHO_PIN);
 UltraSound sensorRight(RIGHT_TRIGGER_PIN, RIGHT_ECHO_PIN);
@@ -755,18 +749,14 @@ Motor motorFrontRight(4);
 Motor motorBackRight(3);
 
 Compass compass;
+Accelerometer accelerometer;
 
 Color color;
 
-Movement m(&compass, &motorFrontLeft, &motorBackLeft, &motorFrontRight, &motorBackRight, &sensorFront, &color);
+Movement m(&compass, &accelerometer, &motorFrontLeft, &motorBackLeft, &motorFrontRight, &motorBackRight, &sensorFront, &color);
 
 //Servo servo;
-
-
-
-
 //ServoControl servoControl(&servo, 10);
-
 
 bool systemOn = true;
 unsigned long previousMillis = 0;
@@ -786,6 +776,7 @@ void setup() {
     motorShield.begin(); //On lance la communication avec le shield
 
     compass.init();
+    accelerometer.init();
 
     color.init();
 }
@@ -803,6 +794,7 @@ void loop() {
     //int reflectanceSensorVal = analogRead(REFLECTANCE_PIN);
     //float voltage = (reflectanceSensorVal/1024.0) * 5.0;
     //Serial.println(voltage);
+
 
     //reflectanceSensor.getReflectance();
 
@@ -824,7 +816,7 @@ void loop() {
 
     // Stop the whole system if TIME_OUT is reached
     unsigned long currentMillis = millis();
-    if (newSpeed < 10 || (TIME_OUT != -1 && (currentMillis - previousMillis >= TIME_OUT))) {
+    if (newSpeed < 10) {
         systemOn = false;
         m.stop();
     } else {
@@ -846,16 +838,14 @@ void loop() {
         m.setDistanceFront(distanceFront);
         m.setDistanceLeft(distanceLeft);
         m.setDistanceRight(distanceRight);
-        int direction = m.update();
+        m.update();
+        //int direction = m.update();
         //Serial.println(direction);
         //servoControl.update(direction);
         //servo.write(direction);
     }
     //led1.update(distanceFront);
     //colorSensor.getColor();
-    
-
-    
 }
 
 

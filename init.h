@@ -3,8 +3,6 @@ const bool DEBUG_POTENT = false;
 const bool DEBUG_SENSOR = true;
 const bool DEBUG_COMPASS = true;
 
-const int TIME_OUT = 50000;
-
 const byte RIGHT_TRIGGER_PIN = 2; // Broche TRIGGER
 const byte RIGHT_ECHO_PIN = 3;    // Broche ECHO
 
@@ -61,6 +59,7 @@ const int COLOR_BLUE[3]   = {0, 0, 255};
 const int COLOR_YELLOW[3] = {255, 255, 0};
 const int COLOR_BROWN[3]  = {160, 90, 44};
 const int COLOR_VIOLET[3] = {128, 0, 128};
+const int COLOR_WHITE[3]  = {255, 255, 255};
 
 
 /* Broches */
